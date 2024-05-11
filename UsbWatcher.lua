@@ -5,10 +5,14 @@ local S = {
 }
 
 function usbChangedCallback(event)
+    message = event["productName"]
+    if message == "" then
+        message = event["vendorName"] .. " #" .. event["productID"]
+    end
     if event["eventType"] == "added" then
-        S.notify("USB", "Connected", event["productName"], event)
+        S.notify("USB", "Connected", message, event)
     else 
-        S.notify("USB", "Disconnected", event["productName"], event)
+        S.notify("USB", "Disconnected", message, event)
     end
 end
 
