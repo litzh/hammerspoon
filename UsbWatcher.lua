@@ -1,10 +1,28 @@
-local M = {}
-M.watcher = nil
+-- internal State
+local S = {
+    watcher = nil,
+    notify = nil,
+}
+
 function usbChangedCallback(event)
-    hs.notify.new({
-        title="USB " .. event["eventType"], 
-        informativeText=event["productName"]}):send()
+    if event["eventType"] == "added" then
+        S.notify("USB", "Connected", event["productName"], event)
+    else 
+        S.notify("USB", "Disconnected", event["productName"], event)
+    end
 end
-M.watcher = hs.usb.watcher.new(usbChangedCallback)
-M.watcher:start()
+
+-- external Interface
+local M = {
+    module = "USB",
+    start = function(self, notify)
+        if notify then
+            S.notify = notify
+        end
+        S.watcher = hs.usb.watcher.new(usbChangedCallback)
+        S.watcher:start()
+    end,
+}
+
 return M
+

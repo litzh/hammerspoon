@@ -1,28 +1,37 @@
-local M = {}
-M.watcher = nil
-M.screens = hs.screen.allScreens()
-M.builtinId = 1 -- This is the id of the built-in display
+-- internal State
+local S = {
+    screens = hs.screen.allScreens(),
+    watcher = nil,
+    notify = nil,
+    builtinId = 1, -- This is the id of the built-in display
+}
+
 function screenWatcherCallback()
     local newScreens = hs.screen.allScreens()
-    for i, screen in ipairs(newScreens) do
-        if not hs.fnutils.contains(M.screens, screen) then
-            hs.notify.new({
-                title="Screen connected",
-                informativeText=screen:name() .. " #" .. screen:id()
-            }):send()
-        end
-    end
-    for i, screen in ipairs(M.screens) do
+    for i, screen in ipairs(S.screens) do
         if not hs.fnutils.contains(newScreens, screen) then
-            hs.notify.new({
-                title="Screen disconnected",
-                informativeText=screen:name() .. " #" .. screen:id()
-            }):send()
+            nofify("Screen", "Disconnected", screen:name())
         end
     end
-    M.screens = newScreens
+    for i, screen in ipairs(newScreens) do
+        if not hs.fnutils.contains(S.screens, screen) then
+            nofify("Screen", "Connected", screen:name())
+        end
+    end
+    S.screens = newScreens
 end
 
-M.watcher = hs.screen.watcher.new(screenWatcherCallback)
-M.watcher:start()
+
+-- external Interface
+local M = {
+    module = "Screen",
+    start = function(self, notify)
+        if notify then
+            S.notify = notify
+        end
+        S.watcher = hs.screen.watcher.new(screenWatcherCallback)
+        S.watcher:start()
+    end,
+}
+
 return M
