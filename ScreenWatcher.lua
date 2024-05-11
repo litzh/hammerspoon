@@ -10,12 +10,12 @@ function screenWatcherCallback()
     local newScreens = hs.screen.allScreens()
     for i, screen in ipairs(S.screens) do
         if not hs.fnutils.contains(newScreens, screen) then
-            nofify("Screen", "Disconnected", screen:name())
+            S.notify("Screen", "Disconnected", screen:name())
         end
     end
     for i, screen in ipairs(newScreens) do
         if not hs.fnutils.contains(S.screens, screen) then
-            nofify("Screen", "Connected", screen:name())
+            S.notify("Screen", "Connected", screen:name())
         end
     end
     S.screens = newScreens
